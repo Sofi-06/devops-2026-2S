@@ -68,3 +68,44 @@ Body esperado en POST `/users`:
   "email": "correo@example.com"
 }
 ```
+
+## Docker Compose
+
+El entorno completo se ejecuta con tres servicios:
+
+- `api`: API Express disponible en `http://localhost:3000`.
+- `postgres`: PostgreSQL disponible en el puerto `5432`.
+- `mongo`: MongoDB disponible en el puerto `27017`.
+
+La API espera a que las dos bases de datos pasen sus healthchecks antes de iniciar.
+
+### Arrancar el entorno
+
+```powershell
+docker compose up --build -d
+docker compose ps
+```
+
+Los servicios `postgres` y `mongo` deben aparecer como `healthy` y `api` como `Up`.
+
+### Probar los servicios
+
+```powershell
+Invoke-RestMethod http://localhost:3000/health
+Invoke-RestMethod http://localhost:3000/api/postgres/health
+Invoke-RestMethod http://localhost:3000/api/mongo/health
+```
+
+Para seguir los registros de la API:
+
+```powershell
+docker compose logs -f api
+```
+
+### Detener el entorno
+
+```powershell
+docker compose down
+```
+
+Los datos se conservan en los volumenes `postgres_data` y `mongo_data`.
