@@ -1,12 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import request from "supertest";
 
-const { pgQuery } = vi.hoisted(() => ({
+const { pgQuery, mongoInsertOne } = vi.hoisted(() => ({
   pgQuery: vi.fn(),
+  mongoInsertOne: vi.fn(),
 }));
 
 vi.mock("../src/db/postgres.js", () => ({
   pgPool: { query: pgQuery },
+}));
+
+vi.mock("../src/db/mongo.js", () => ({
+  getMongoDb: () => ({
+    collection: () => ({ insertOne: mongoInsertOne }),
+  }),
 }));
 
 import { createApp } from "../src/app.js";
@@ -29,6 +36,7 @@ describe("Books API (/api/books)", () => {
     pgQuery
       .mockResolvedValueOnce({})
       .mockResolvedValueOnce({ rows: [createdBook], rowCount: 1 });
+    mongoInsertOne.mockResolvedValueOnce({ insertedId: "mockedId123" });
 
     const res = await request(app)
       .post("/api/books")
@@ -37,6 +45,7 @@ describe("Books API (/api/books)", () => {
     expect(res.status).toBe(201);
     expect(res.body).toEqual(createdBook);
     expect(pgQuery).toHaveBeenCalled();
+    expect(mongoInsertOne).toHaveBeenCalled();
   });
 
   it("Test 2: Un caso de error que envíe datos incompletos (sin páginas), verifique que responda estado 400 y confirme que la base de datos no fue tocada", async () => {
@@ -47,5 +56,6 @@ describe("Books API (/api/books)", () => {
     expect(res.status).toBe(400);
     expect(res.body).toHaveProperty("message");
     expect(pgQuery).not.toHaveBeenCalled();
+    expect(mongoInsertOne).not.toHaveBeenCalled();
   });
 });
