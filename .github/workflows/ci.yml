@@ -40,3 +40,28 @@ jobs:
 
       - name: Compilar
         run: npm run build
+
+  practica-productos:
+    name: Práctica productos
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v5
+
+      - name: Instalar Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Correr tests de productos
+        continue-on-error: true
+        run: npm run test:productos
+
+      - name: Publicar nota
+        if: always()
+        run: node scripts/grade-productos.mjs productos-results.json
