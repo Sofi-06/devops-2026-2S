@@ -8,6 +8,7 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
+    "debug": "tsx --inspect-brk src/debug/index.tsx",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:productos": "vitest run --config vitest.productos.config.ts --reporter=default --reporter=json --outputFile=productos-results.json",
